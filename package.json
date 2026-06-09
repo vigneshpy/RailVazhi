@@ -1,0 +1,16 @@
+{
+  "name": "railvazhi",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "concurrently --names \"api,web\" --prefix-colors \"blue,green\" \"pnpm dev:api\" \"pnpm dev:web\"",
+    "dev:api": "pnpm --filter api dev",
+    "dev:web": "pnpm --filter web dev",
+    "build": "pnpm --filter shared build && pnpm --filter api build && pnpm --filter web build",
+    "lint": "pnpm -r lint"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "typescript": "^5.4.5"
+  }
+}
