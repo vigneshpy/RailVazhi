@@ -7,15 +7,18 @@ type Props = {
 };
 
 export function NotificationToggle({ onGranted }: Props) {
+  const [mounted, setMounted] = useState(false);
   const [permission, setPermission] = useState<NotificationPermission>("default");
 
   useEffect(() => {
+    setMounted(true);
     if (typeof Notification !== "undefined") {
       setPermission(Notification.permission);
     }
   }, []);
 
-  if (typeof Notification === "undefined") return null;
+  // Render nothing until client-side mount so server HTML matches first paint
+  if (!mounted || typeof Notification === "undefined") return null;
   if (permission === "denied") {
     return (
       <p className="text-xs text-gray-400 text-center">
