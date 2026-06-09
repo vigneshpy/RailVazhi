@@ -194,6 +194,54 @@ pnpm --filter api validate --gate=G001 --hours=6 --interval=5
 
 ---
 
+## Deployment
+
+Free stack: **Supabase** (database) + **Railway** (API) + **Vercel** (web).
+
+### 1. Database - Supabase
+
+1. Create a free project at [supabase.com](https://supabase.com)
+2. Go to **SQL Editor** and run:
+   ```sql
+   CREATE EXTENSION IF NOT EXISTS postgis;
+   ```
+3. Copy your connection string from **Settings > Database > Connection string > URI**
+   - It looks like `postgresql://postgres:[password]@db.[ref].supabase.co:5432/postgres`
+4. Run migrations and seed from your local machine:
+   ```bash
+   DATABASE_URL="<your-supabase-url>" pnpm --filter api db:migrate
+   DATABASE_URL="<your-supabase-url>" pnpm --filter api db:seed
+   ```
+
+### 2. API - Railway
+
+1. Go to [railway.app](https://railway.app) and create a new project from GitHub
+2. Select the `RailVazhi` repo, set the **root directory** to `apps/api`
+3. Add these environment variables in Railway's dashboard:
+   ```
+   DATABASE_URL=<your-supabase-url>
+   NODE_ENV=production
+   WEB_ORIGIN=https://<your-vercel-app>.vercel.app
+   ```
+4. Railway detects `railway.toml` and runs the build automatically
+5. Copy the Railway deployment URL (e.g. `https://railvazhi-api.up.railway.app`)
+
+### 3. Web - Vercel
+
+1. Go to [vercel.com](https://vercel.com) and import the `RailVazhi` GitHub repo
+2. Set **Root Directory** to `apps/web`
+3. Add this environment variable:
+   ```
+   NEXT_PUBLIC_API_URL=https://<your-railway-api>.up.railway.app
+   ```
+4. Deploy - Vercel auto-detects Next.js, no other config needed
+
+### After deploying
+
+Go back to Railway and update `WEB_ORIGIN` to match your actual Vercel URL, then redeploy the API. This is required for CORS to allow requests from your web app.
+
+---
+
 ## License
 
 MIT
