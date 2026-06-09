@@ -13,11 +13,20 @@ Rail Vazhi tells you: given your route, which gates will be closed, when, and fo
 
 ---
 
-## Demo
+## Screenshots
 
-| Route Form | Gate Status | Map View |
-|---|---|---|
-| Pick from/to on map or search | Live closure windows per gate | Route polyline + gate markers |
+<table>
+<tr>
+<td align="center"><b>Home</b></td>
+<td align="center"><b>Location Picker</b></td>
+<td align="center"><b>Results</b></td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/01-home.png" width="260" alt="Home screen with route form"/></td>
+<td><img src="docs/screenshots/02-location-picker.png" width="260" alt="Location picker with map and search"/></td>
+<td><img src="docs/screenshots/03-results-viewport.png" width="260" alt="Gate predictions with recommendation"/></td>
+</tr>
+</table>
 
 ---
 
