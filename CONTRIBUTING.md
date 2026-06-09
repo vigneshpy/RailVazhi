@@ -58,27 +58,76 @@ packages/shared/src/
 
 ## Adding Gate Data
 
-Gate coordinates are the most valuable contribution right now. The seed data has placeholder coordinates for some gates.
+Gate coordinates are the most valuable contribution right now. The seed data has placeholder or approximate coordinates for some gates.
 
-To add or fix a gate:
+### Step 1 - Get the lat/lng of the crossing
 
-1. Find the crossing on [OpenRailwayMap](https://www.openrailwaymap.org/)
-   - Enable the "Railroad infrastructure" layer
-   - Level crossings show as small squares on the line
-   - Click the node to get its exact lat/lng
+**Easiest: Google Maps**
 
-2. Alternatively use Overpass Turbo:
+1. Open [Google Maps](https://maps.google.com)
+2. Navigate to the crossing location (search the road name or nearby landmark)
+3. Zoom in until you can see the railway line crossing the road
+4. Right-click exactly on the point where the rail crosses the road
+5. The first item in the menu is the coordinates, e.g. `9.4711, 77.8013`
+6. Click those numbers to copy them - first number is `lat`, second is `lng`
+
+**More accurate: Overpass Turbo (finds official OSM railway crossing nodes)**
+
+1. Open [overpass-turbo.eu](https://overpass-turbo.eu)
+2. Pan the map to your crossing area
+3. Paste this query and click Run:
    ```
-   node["railway"="level_crossing"]({{bbox}});out body;
+   node["railway"="level_crossing"]({{bbox}});
+   out body;
    ```
+4. Blue dots appear on all level crossings in the visible area
+5. Click the dot at your crossing - a popup shows the node details
+6. The coordinates appear as `lat` and `lon` in the popup (e.g. `9.4711608`, `77.8013653`)
 
-3. Edit `apps/api/src/db/seed.sql` — update the `lat`, `lng`, and `distance_from_upstream_km` for the gate
+**Also works: OpenStreetMap directly**
 
-4. Measure `distance_from_upstream_km` using the measurement tool on OpenRailwayMap or QGIS
+1. Open [openstreetmap.org](https://openstreetmap.org) and zoom into your crossing
+2. Click the crossing point on the map
+3. In the left panel, click "Query features" and click the crossing node
+4. The URL changes to something like `?mlat=9.4711&mlon=77.8013` - those are your coordinates
 
-5. Re-run the seed: `pnpm --filter api db:seed`
+---
 
-6. Verify the gate appears in `pnpm --filter api test:gates`
+### Step 2 - Measure distance_from_upstream_km
+
+This is how far the gate is from the upstream station along the railway line.
+
+**Quick method: Google Maps distance tool**
+
+1. Right-click on the upstream station (e.g. Thiruthangal) and choose "Measure distance"
+2. Click along the railway line to the gate location
+3. The total shown is your `distance_from_upstream_km` value (round to 1 decimal)
+
+Upstream means the station a train coming from Sivakasi would pass *before* reaching this gate. Check `seed.sql` for the `upstream_station_code` column to know which station that is.
+
+---
+
+### Step 3 - Update the seed file
+
+Open `apps/api/src/db/seed.sql` and find the gate entry (search for the gate ID like `G003`):
+
+```sql
+('G003', 'Gate Name', 9.XXXXXX, 77.XXXXXX, 'SVKS', 'TTL', X.X),
+-- columns:   id       name        lat        lng    upstream downstream  distance_km
+```
+
+Replace the placeholder `lat`, `lng`, and `distance_from_upstream_km` with your measured values.
+
+---
+
+### Step 4 - Apply and verify
+
+```bash
+pnpm --filter api db:seed        # re-seeds (safe to run multiple times)
+pnpm --filter api test:gates     # should show this gate on a Sivakasi-Madurai route
+```
+
+If the gate doesn't appear in `test:gates`, the coordinates may be too far from the road routing line (more than 500 m). Double-check you placed the pin on the crossing point, not a nearby station or road.
 
 ---
 
